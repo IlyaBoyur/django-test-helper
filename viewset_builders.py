@@ -3,7 +3,7 @@ import re
 from textwrap import dedent
 
 
-class TestImportsBuilder:
+class TestViewsetImportsBuilder:
     def __init__(self, models, outfile):
         self.models = models
         self.outfile = outfile
