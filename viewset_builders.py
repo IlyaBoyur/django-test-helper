@@ -36,7 +36,7 @@ class TestViewsetBuilder:
                        else char for char in string]).lstrip('_')
 
     @staticmethod
-    def text_indenter(text: str, times=1) -> Generator[int, None, None]:
+    def text_indenter(text: str, times=1) -> Generator[str, None, None]:
         return (times * " " * 4 + line + "\n" for line in text.split("\n"))
 
     def build_schema(self, model):
