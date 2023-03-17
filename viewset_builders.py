@@ -42,7 +42,6 @@ class TestViewsetBuilder:
     def build_schema(self, model):
         self.model = [model, self._build_view_set_name(model)]
 
-
     def _build_view_set_name(self, camel_name):
         return f"{camel_name}ViewSet"
 
