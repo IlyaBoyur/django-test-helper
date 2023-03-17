@@ -12,19 +12,22 @@ class TestRouteImportsBuilder:
     def __init__(self, models: List[str], outfile: str):
         self.models = models
         self.outfile = outfile
-    
-    def dump_test_imports(self):
+
+    def build(self):
         if not self.models:
             raise RuntimeError("Модели для импорта не предоставлены")
+        self._dump_test_imports()
+    
+    def _dump_test_imports(self):
         factories = ", ".join(model + "Factory" for model in self.models)
         import_lines = (
             f'import pytest\n\n'
             f'from rest_framework.reverse import reverse\n\n'
             f'from .factories import {factories}\n\n\n'
         )
-        self.dump_test_data(import_lines)
+        self._dump_test_data(import_lines)
 
-    def dump_test_data(self, data: Iterable[str]):
+    def _dump_test_data(self, data: Iterable[str]):
         with open(self.outfile, "a") as file:
             file.writelines(data)
 
@@ -67,7 +70,7 @@ class TestRouteBuilder:
     def dump_test_header(self):
         header_lines = dedent("""
         @pytest.mark.django_db
-        def test_routes(subtests):
+        def test_routes():
             \"\"\"
             URL-адрес, рассчитанный через имя,
             соответствует ожидаемому видимому URL.
@@ -79,30 +82,24 @@ class TestRouteBuilder:
         self.dump_test_data(text)
 
     def dump_test_list_route(self, prefix: str, basename: str):
-        list_lines = dedent(f"""
-            "/api/{prefix}/": reverse("{basename}-list"),
-        """)
+        list_lines = f'"/api/{prefix}/": reverse("{basename}-list"),'
         text = self.text_indenter(list_lines, 2)
         self.dump_test_data(text)
 
     def dump_test_detail_route(self, prefix: str, basename: str, detailname: str):
-        detail_lines = dedent(f"""
-                f"/api/{prefix}/{{{detailname}.id}}/": reverse("{basename}-detail", args=[{detailname}.id]),
-        """)
+        detail_lines = (
+            f'f"/api/{prefix}/{{{detailname}.id}}/": reverse("{basename}-detail", args=[{detailname}.id]),'
+        )
         text = self.text_indenter(detail_lines, 2)
         self.dump_test_data(text)
 
     def dump_test_specs_route(self, prefix: str, basename: str):
-        specs_lines = dedent(f"""
-                "/api/{prefix}/specs/": reverse("{basename}-specs"),
-            """)
+        specs_lines = f'"/api/{prefix}/specs/": reverse("{basename}-specs"),'
         text = self.text_indenter(specs_lines, 2)
         self.dump_test_data(text)
 
     def dump_test_facets_route(self, prefix: str, basename: str):
-        facets_lines = dedent(f"""
-                "/api/{prefix}/facets/": reverse("{basename}-facets"),
-        """)
+        facets_lines = f'"/api/{prefix}/facets/": reverse("{basename}-facets"),'
         text = self.text_indenter(facets_lines, 2)
         self.dump_test_data(text)
 
