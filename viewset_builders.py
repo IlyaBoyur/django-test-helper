@@ -43,12 +43,12 @@ class TestViewsetBuilder:
         self.out = out or []
 
     @staticmethod
-    def camel_2_snake_case(string):
+    def camel_2_snake_case(string: str):
         return ''.join(['_' + char.lower() if char.isupper()
                        else char for char in string]).lstrip('_')
 
     @staticmethod
-    def text_indenter(text: str, times=1) -> Generator[str, None, None]:
+    def text_indenter(text: str, times: int=1) -> Generator[str, None, None]:
         return (times * " " * 4 + line + "\n" for line in text.split("\n"))
 
     def build(self):
@@ -56,7 +56,8 @@ class TestViewsetBuilder:
         self.dump_test_class()
     
     def build_schema(self):
-        self.model_name = self.model
+        self.camel = self.model
+        self.snake = self.camel_2_snake_case(self.model)
         self.viewset_name = self._build_view_set_name(self.model)
 
     def _build_view_set_name(self, camel_name):
@@ -84,12 +85,10 @@ class TestViewsetBuilder:
         self.dump_test_class_footer()
 
     def dump_test_class_header(self):
-        camel_name = self.model_name
-        viewset_name = self.viewset_name
-        snake_name = self.camel_2_snake_case(camel_name)
+        snake_name = self.snake
 
         header_lines = (
-            f'class {self._build_test_class_name(viewset_name)}:\n'
+            f'class {self._build_test_class_name(self.viewset_name)}:\n'
             f'    {self._build_url_name(snake_name, "list")} = reverse("{snake_name}s-list")\n'
         )
         header_lines += (
@@ -104,8 +103,8 @@ class TestViewsetBuilder:
 
 
     def dump_test_list(self):
-        camel_name = self.model_name
-        snake_name = self.camel_2_snake_case(camel_name)
+        camel_name = self.camel
+        snake_name = self.snake
 
         list_lines = dedent(f"""
             @pytest.mark.django_db
@@ -122,8 +121,8 @@ class TestViewsetBuilder:
         self.dump_test_data(text)
 
     def dump_test_detail(self):
-        camel_name = self.model_name
-        snake_name = self.camel_2_snake_case(camel_name)
+        camel_name = self.camel
+        snake_name = self.snake
         detail_url = self._build_url_name(snake_name, "detail")
 
         detail_lines = dedent(f"""
@@ -142,8 +141,8 @@ class TestViewsetBuilder:
         self.dump_test_data(text)
 
     def dump_test_specs(self):
-        camel_name = self.model_name
-        snake_name = self.camel_2_snake_case(camel_name)
+        camel_name = self.camel
+        snake_name = self.snake
 
         specs_lines = dedent(f"""
             @pytest.mark.django_db
@@ -161,8 +160,8 @@ class TestViewsetBuilder:
         self.dump_test_data(text)
 
     def dump_test_facets(self):
-        camel_name = self.model_name
-        snake_name = self.camel_2_snake_case(camel_name)
+        camel_name = self.camel
+        snake_name = self.snake
 
         facets_lines = dedent(f"""
             @pytest.mark.django_db
@@ -182,8 +181,8 @@ class TestViewsetBuilder:
         self.dump_test_data(text)
 
     def dump_test_filter(self):
-        camel_name = self.model_name
-        snake_name = self.camel_2_snake_case(camel_name)
+        camel_name = self.camel
+        snake_name = self.snake
 
         filter_lines = dedent(f"""
             @pytest.mark.django_db
