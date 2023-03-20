@@ -2,7 +2,7 @@ import argparse
 
 from factory_builder import FactoryFileBuilder
 from viewset_builders import TestViewsetImportsBuilder, TestViewsetBuilder, TestViewsetFileBuilder
-from routes_builder import TestRouteImportsBuilder, TestRouteBuilder
+from routes_builder import TestRouteImportsBuilder, TestRouteBuilder, TestRouteFileBuilder
 from constants import SUPPORTED_TESTS
 
 
@@ -31,15 +31,24 @@ if __name__ == "__main__":
     with open(test_view_file, "w") as file:
         file.writelines(builder.out)
 
-    builder = TestRouteImportsBuilder(models=MODELS)
-    builder.build()
-    with open(test_routes_file, "w") as file:
-        file.writelines(builder.out)
+    # builder = TestRouteImportsBuilder(models=MODELS)
+    # builder.build()
+    # with open(test_routes_file, "w") as file:
+    #     file.writelines(builder.out)
 
-    builder = TestRouteBuilder(
-        ["actions", "actions"], methods=SUPPORTED_TESTS
+    # builder = TestRouteBuilder(
+    #     ["actions", "actions"], methods=SUPPORTED_TESTS
+    # )
+    # builder.build()
+    # with open(test_routes_file, "a") as file:
+    #     file.writelines(builder.out)
+    
+    builder = TestRouteFileBuilder(
+        models=MODELS, 
+        data=["actions", "actions"],
+        methods=SUPPORTED_TESTS
     )
     builder.build()
-    with open(test_routes_file, "a") as file:
+    with open(test_routes_file, "w") as file:
         file.writelines(builder.out)
     

@@ -3,6 +3,10 @@ from textwrap import dedent
 import re
 
 
+UrlData = Tuple[str, str]
+
+
+
 class TestRouteFileBuilder:
     def __init__(self, models: List[str], data: UrlData, methods: List[str]=None, out: List[str]=None):
         self.models = models
@@ -11,13 +15,13 @@ class TestRouteFileBuilder:
         self.out = out or []
 
     def build(self):
-        imports = TestRouteImportsBuilder(self.models, out=self.out)
-        imports.build()
-        self.out.extend(imports.out)
+        for builder in [
+            TestRouteImportsBuilder(self.models),
+            TestRouteBuilder(self.data, methods=self.methods)
+        ]:
+            builder.build()
+            self.out.extend(builder.out)
 
-        routes = TestRouteBuilder(self.data, methods=self.methods, out=self.out)
-        imports.build()
-        self.out.extend(imports.out)
 
 
 class TestRouteImportsBuilder:
@@ -49,7 +53,7 @@ class TestRouteImportsBuilder:
         self.out.extend(lines)
 
 
-UrlData = Tuple[str, str]
+
 
 
 class TestRouteBuilder:
