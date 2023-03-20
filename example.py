@@ -21,22 +21,15 @@ if __name__ == "__main__":
 
     MODELS = open(models_file).readlines() if models_file else []
     
-    builder = FactoryFileBuilder(models=MODELS)
-    builder.build()
-    with open(factories_file, "w") as file:
-        file.writelines(builder.out)
-
-    builder = TestViewsetFileBuilder(models=MODELS, methods=SUPPORTED_TESTS)
-    builder.build()
-    with open(test_view_file, "w") as file:
-        file.writelines(builder.out)
-
-    builder = TestRouteFileBuilder(
-        models=MODELS, 
-        data=["actions", "actions"],
-        methods=SUPPORTED_TESTS
-    )
-    builder.build()
-    with open(test_routes_file, "w") as file:
-        file.writelines(builder.out)
-    
+    for builder, filename in [
+        [FactoryFileBuilder(models=MODELS), factories_file],
+        [TestViewsetFileBuilder(models=MODELS, methods=SUPPORTED_TESTS), test_view_file],
+        [TestRouteFileBuilder(
+            models=MODELS, 
+            data=["actions", "actions"],
+            methods=SUPPORTED_TESTS
+        ), test_routes_file],
+    ]:
+        builder.build()
+        with open(filename, "w") as file:
+            file.writelines(builder.out)

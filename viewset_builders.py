@@ -10,14 +10,12 @@ class TestViewsetFileBuilder:
         self.out = out or []
     
     def build(self):
-        imports = TestViewsetImportsBuilder(self.models)
-        imports.build()
-        self.out.extend(imports.out)
-
-        for model in self.models:
-            viewset = TestViewsetBuilder(model, self.methods)
-            viewset.build()
-            self.out.extend(viewset.out)
+        for builder in [
+            TestViewsetImportsBuilder(self.models),
+            *[TestViewsetBuilder(model, self.methods) for model in self.models]
+        ]:
+            builder.build()
+            self.out.extend(builder.out)
 
 
 class TestViewsetImportsBuilder:
