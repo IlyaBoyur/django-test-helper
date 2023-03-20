@@ -2,10 +2,10 @@ from typing import List
 
 
 class FactoryFileBuilder:
-    def __init__(self, infile: str, models: List[str], outfile: str):
+    def __init__(self, infile: str, models: List[str], out: List[str]=None):
         self.infile = infile
-        self.models = models
-        self.outfile = outfile
+        self.models = models or []
+        self.out = out or []
  
     def build(self):
         self.build_schema()
@@ -38,10 +38,8 @@ class FactoryFileBuilder:
     
     def dump_imports(self):
         models = ", ".join(self.model_names)
-        with open(self.outfile, "a") as file:
-            file.write(f"import factory.fuzzy\n")
-            file.write(f"from ..models import {models}\n\n\n")
+        self.out.append(f"import factory.fuzzy\n")
+        self.out.append(f"from ..models import {models}\n\n\n")
 
     def dump_factories(self):
-        with open(self.outfile, "a") as file:
-            file.writelines("\n".join(self._generate_factories()))
+        self.out.extend("\n".join(self._generate_factories()))
