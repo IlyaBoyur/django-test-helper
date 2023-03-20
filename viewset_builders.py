@@ -93,10 +93,12 @@ class TestViewsetBuilder:
             f'    {self._build_url_name(snake_name, "list")} = reverse("{snake_name}s-list")\n'
         )
         header_lines += (
-            f'    {self._build_url_name(snake_name, "specs")} = reverse("{snake_name}s-specs")\n' if "specs" in self.methods else ""
+            f'    {self._build_url_name(snake_name, "specs")} = reverse("{snake_name}s-specs")\n'
+            if "specs" in self.methods else ""
         )
         header_lines += (
-            f'    {self._build_url_name(snake_name, "facets")} = reverse("{snake_name}s-facets")\n' if "facets" in self.methods else ""
+            f'    {self._build_url_name(snake_name, "facets")} = reverse("{snake_name}s-facets")\n'
+            if "facets" in self.methods else ""
         )
         self.dump_test_data(header_lines)
 
@@ -107,11 +109,11 @@ class TestViewsetBuilder:
 
         list_lines = dedent(f"""
             @pytest.mark.django_db
-            def test_list(self, django_assert_num_queries, client):
+            def test_list(self, django_assert_num_queries, api_client):
                 {snake_name}s = [{camel_name}Factory() for _ in range(3)]
 
                 with django_assert_num_queries(1):
-                    response = client.get(self.{self._build_url_name(snake_name, "list")})
+                    response = api_client.get(self.{self._build_url_name(snake_name, "list")})
 
                 assert response.status_code == HTTP_200_OK
                 assert len(response.json()) == len({snake_name}s)
@@ -126,12 +128,12 @@ class TestViewsetBuilder:
 
         detail_lines = dedent(f"""
             @pytest.mark.django_db
-            def test_retrieve(self, django_assert_num_queries, client):
+            def test_retrieve(self, django_assert_num_queries, api_client):
                 {snake_name} = {camel_name}Factory()
                 {detail_url} = reverse("{snake_name}s-detail", args=[{snake_name}.id])
 
                 with django_assert_num_queries(1):
-                    response = client.get({detail_url})
+                    response = api_client.get({detail_url})
 
                 assert response.status_code == HTTP_200_OK
                 assert response.json()["id"] == {snake_name}.id
@@ -140,16 +142,67 @@ class TestViewsetBuilder:
         self.dump_test_data(text)
 
     def dump_test_specs(self):
-        specs_lines = ""
-        self.dump_test_data(specs_lines)
+        camel_name = self.model_name
+        snake_name = self.camel_2_snake_case(camel_name)
+
+        specs_lines = dedent(f"""
+            @pytest.mark.django_db
+            def test_specs(self, django_assert_num_queries, api_client):
+                {snake_name}s = [{camel_name}Factory() for _ in range(3)]
+
+                with django_assert_num_queries(1):
+                    response = api_client.get(self.{self._build_url_name(snake_name, "specs")})
+                specs = {{spec["name"]: spec.get("choices") or spec.get("range") for spec in response.json()}}
+                
+                assert response.status_code == HTTP_200_OK
+                assert specs["<spec>"] == len(<model>)
+        """)
+        text = self.text_indenter(specs_lines)
+        self.dump_test_data(text)
 
     def dump_test_facets(self):
-        facets_lines = ""
-        self.dump_test_data(facets_lines)
+        camel_name = self.model_name
+        snake_name = self.camel_2_snake_case(camel_name)
+
+        facets_lines = dedent(f"""
+            @pytest.mark.django_db
+            def test_facets(self, django_assert_num_queries, api_client):
+                {snake_name}s = [{camel_name}Factory() for _ in range(3)]
+
+                with django_assert_num_queries(1):
+                    response = api_client.get(self.{self._build_url_name(snake_name, "facets")})
+                json = response.json()
+                facets = {{spec["name"]: facet.get("choices") or facet.get("range") for facet in response.json()["facets"]}}
+                
+                assert response.status_code == HTTP_200_OK
+                assert facets["<facet>"] == len(<model>)
+                assert json["count"] == len({snake_name}s)
+        """)
+        text = self.text_indenter(facets_lines)
+        self.dump_test_data(text)
 
     def dump_test_filter(self):
-        filter_lines = ""
-        self.dump_test_data(filter_lines)
+        camel_name = self.model_name
+        snake_name = self.camel_2_snake_case(camel_name)
+
+        filter_lines = dedent(f"""
+            @pytest.mark.django_db
+            def test_filter(self, django_assert_num_queries, api_client):
+                {snake_name}s = [{camel_name}Factory() for _ in range(3)]
+
+                # <filter>
+                data = {{
+                    "<filter>": <value>,
+                }}
+                with django_assert_num_queries(1):
+                    response = api_client.get(self.{self._build_url_name(snake_name, "list")}, data=data)
+                
+                assert response.status_code == HTTP_200_OK
+                for {snake_name} in response.json():
+                    assert {snake_name}["<filter>"] == <value>
+        """)
+        text = self.text_indenter(filter_lines)
+        self.dump_test_data(text)
 
     def dump_test_class_footer(self):
         footer_lines = "\n\n"
