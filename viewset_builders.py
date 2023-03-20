@@ -3,14 +3,23 @@ import re
 from textwrap import dedent
 
 
-class TestViewsetImportsBuilder:
-    def __init__(self, models, outfile):
-        self.models = models
-        self.outfile = outfile
+class TestViewsetFileBuilder:
+    def __init__(self, models, out: List[str]=None):
+        self.models = models or []
+        self.out = out or []
     
-    def dump_test_imports(self):
-        if not self.models:
-            raise RuntimeError("Модели для импорта не предоставлены")
+    def build(self):
+        imports = TestViewsetImportsBuilder(self.models, None)
+
+
+
+
+class TestViewsetImportsBuilder:
+    def __init__(self, models: List[str], out=None):
+        self.models = models
+        self.out = out or []
+    
+    def build(self):
         factories = ", ".join(model + "Factory" for model in self.models)
         import_lines = (
             f'import pytest\n\n'
@@ -18,11 +27,7 @@ class TestViewsetImportsBuilder:
             f'from rest_framework.status import HTTP_200_OK\n\n'
             f'from .factories import {factories}\n\n\n'
         )
-        self.dump_test_data(import_lines)
-
-    def dump_test_data(self, data: Iterable[str]):
-        with open(self.outfile, "a") as file:
-            file.writelines(data)
+        self.out.extend(import_lines)
 
 
 class TestViewsetBuilder:
