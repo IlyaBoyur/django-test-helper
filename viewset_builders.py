@@ -15,7 +15,7 @@ class TestViewsetFileBuilder:
 
 
 class TestViewsetImportsBuilder:
-    def __init__(self, models: List[str], out=None):
+    def __init__(self, models: List[str], out: List[str]=None):
         self.models = models
         self.out = out or []
     
@@ -31,9 +31,10 @@ class TestViewsetImportsBuilder:
 
 
 class TestViewsetBuilder:
-    def __init__(self, infile: str, outfile: str):
-        self.infile = infile
-        self.outfile = outfile
+    def __init__(self, model: str, methods: List[str]=None, out: List[str]=None):
+        self.model = model
+        self.methods = methods or tuple()
+        self.out = out or []
 
     @staticmethod
     def camel_2_snake_case(string):
@@ -44,8 +45,13 @@ class TestViewsetBuilder:
     def text_indenter(text: str, times=1) -> Generator[str, None, None]:
         return (times * " " * 4 + line + "\n" for line in text.split("\n"))
 
-    def build_schema(self, model):
-        self.model = [model, self._build_view_set_name(model)]
+    def build(self):
+        self.build_schema()
+        self.dump_test_class()
+    
+    def build_schema(self):
+        self.model_name = self.model
+        self.viewset_name = self._build_view_set_name(self.model)
 
     def _build_view_set_name(self, camel_name):
         return f"{camel_name}ViewSet"
@@ -57,35 +63,40 @@ class TestViewsetBuilder:
         return f"{snake_name.upper()}_{type.upper()}_URL"
 
 
-    def dump_test_class(self, methods=tuple()):
+    def dump_test_class(self):
         self.dump_test_class_header()
-        if "list" in methods:
+        if "list" in self.methods:
             self.dump_test_list()
-        if "detail" in methods:
+        if "detail" in self.methods:
             self.dump_test_detail()
-        if "specs" in methods:
+        if "specs" in self.methods:
             self.dump_test_specs()
-        if "facets" in methods:
+        if "facets" in self.methods:
             self.dump_test_facets()
-        if "filter" in methods:
+        if "filter" in self.methods:
             self.dump_test_filter()
         self.dump_test_class_footer()
 
     def dump_test_class_header(self):
-        camel_name, viewset_name = self.model
+        # camel_name, viewset_name = self.model
+        camel_name = self.model_name
+        viewset_name = self.viewset_name
         snake_name = self.camel_2_snake_case(camel_name)
 
         header_lines = (
             f'class {self._build_test_class_name(viewset_name)}:\n'
             f'    {self._build_url_name(snake_name, "list")} = reverse("{snake_name}s-list")\n'
-            f'    {self._build_url_name(snake_name, "specs")} = reverse("{snake_name}s-specs")\n'
-            f'    {self._build_url_name(snake_name, "facets")} = reverse("{snake_name}s-facets")\n\n'
+            f'    {self._build_url_name(snake_name, "specs")} = reverse("{snake_name}s-specs")' if "specs" in self.methods else ""
+            '\n'
+            f'    {self._build_url_name(snake_name, "facets")} = reverse("{snake_name}s-facets")' if "facets" in self.methods else ""
+            '\n\n'
         )
         self.dump_test_data(header_lines)
 
 
     def dump_test_list(self):
-        camel_name, _ = self.model
+        # camel_name, _ = self.model
+        camel_name = self.model_name
         snake_name = self.camel_2_snake_case(camel_name)
 
         list_lines = dedent(f"""
@@ -103,7 +114,8 @@ class TestViewsetBuilder:
         self.dump_test_data(text)
 
     def dump_test_detail(self):
-        camel_name, _ = self.model
+        # camel_name, _ = self.model
+        camel_name = self.model_name
         snake_name = self.camel_2_snake_case(camel_name)
         detail_url = self._build_url_name(snake_name, "detail")
 
@@ -139,5 +151,4 @@ class TestViewsetBuilder:
         self.dump_test_data(footer_lines)
 
     def dump_test_data(self, data: Iterable[str]):
-        with open(self.outfile, "a") as file:
-            file.writelines(data)
+        self.out.extend(data)
