@@ -7,18 +7,17 @@ class FactoryFileBuilder:
         self.models = models or []
         self.out = out or []
  
-    def build(self):
+    def build(self) -> None:
         self.build_schema()
         self.dump_imports()
         self.dump_factories()
     
-    def build_schema(self):
+    def build_schema(self) -> None:
         model_names = self.models or self._parse_models()
         if not model_names:
             raise RuntimeError("Модели не определены")
 
         self.model_names = model_names
-
 
     def _parse_models(self) -> List[str]:
         with open(self.infile) as infile:
