@@ -84,7 +84,6 @@ class TestViewsetBuilder:
         self.dump_test_class_footer()
 
     def dump_test_class_header(self):
-        # camel_name, viewset_name = self.model
         camel_name = self.model_name
         viewset_name = self.viewset_name
         snake_name = self.camel_2_snake_case(camel_name)
@@ -103,7 +102,6 @@ class TestViewsetBuilder:
 
 
     def dump_test_list(self):
-        # camel_name, _ = self.model
         camel_name = self.model_name
         snake_name = self.camel_2_snake_case(camel_name)
 
@@ -122,7 +120,6 @@ class TestViewsetBuilder:
         self.dump_test_data(text)
 
     def dump_test_detail(self):
-        # camel_name, _ = self.model
         camel_name = self.model_name
         snake_name = self.camel_2_snake_case(camel_name)
         detail_url = self._build_url_name(snake_name, "detail")
