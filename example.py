@@ -31,18 +31,6 @@ if __name__ == "__main__":
     with open(test_view_file, "w") as file:
         file.writelines(builder.out)
 
-    # builder = TestRouteImportsBuilder(models=MODELS)
-    # builder.build()
-    # with open(test_routes_file, "w") as file:
-    #     file.writelines(builder.out)
-
-    # builder = TestRouteBuilder(
-    #     ["actions", "actions"], methods=SUPPORTED_TESTS
-    # )
-    # builder.build()
-    # with open(test_routes_file, "a") as file:
-    #     file.writelines(builder.out)
-    
     builder = TestRouteFileBuilder(
         models=MODELS, 
         data=["actions", "actions"],
