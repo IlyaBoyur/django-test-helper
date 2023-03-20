@@ -25,10 +25,11 @@ if __name__ == "__main__":
         file.writelines(builder.out)
 
 
-    with open(test_view_file, "w"):
-        pass
-    builder = TestViewsetImportsBuilder(MODELS, outfile=test_view_file)
-    builder.dump_test_imports()
+    builder = TestViewsetImportsBuilder(models=MODELS)
+    builder.build()
+
+    with open(test_view_file, "w") as file:
+        file.writelines(builder.out)
 
     builder = TestViewsetBuilder(None, outfile=test_view_file)
     for model in MODELS:
