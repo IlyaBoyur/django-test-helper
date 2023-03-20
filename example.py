@@ -19,7 +19,7 @@ if __name__ == "__main__":
 
     MODELS = open(models_file).readlines() if models_file else []
     
-    builder = FactoryFileBuilder(None, models=MODELS)
+    builder = FactoryFileBuilder(models=MODELS)
     builder.build()
     with open(factories_file, "w") as file:
         file.writelines(builder.out)
@@ -27,14 +27,19 @@ if __name__ == "__main__":
 
     builder = TestViewsetImportsBuilder(models=MODELS)
     builder.build()
-
     with open(test_view_file, "w") as file:
         file.writelines(builder.out)
 
-    builder = TestViewsetBuilder(None, outfile=test_view_file)
     for model in MODELS:
-        builder.build_schema(model)
-        builder.dump_test_class(methods=SUPPORTED_TESTS)
+        builder = TestViewsetBuilder(model, methods=SUPPORTED_TESTS)
+        builder.build()
+        with open(test_view_file, "a") as file:
+            file.writelines(builder.out)
+    
+    
+
+
+        
     # builder = TestRouteImportsBuilder(["Action"], outfile="out/test_routes_TEMP.py")
     # builder.build()
 
