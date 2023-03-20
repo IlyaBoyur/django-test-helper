@@ -37,7 +37,7 @@ if __name__ == "__main__":
         file.writelines(builder.out)
 
     builder = TestRouteBuilder(
-        ["actions", "actions", SUPPORTED_TESTS]
+        ["actions", "actions"], methods=SUPPORTED_TESTS
     )
     builder.build()
     with open(test_routes_file, "a") as file:
