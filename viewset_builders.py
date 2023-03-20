@@ -92,10 +92,12 @@ class TestViewsetBuilder:
         header_lines = (
             f'class {self._build_test_class_name(viewset_name)}:\n'
             f'    {self._build_url_name(snake_name, "list")} = reverse("{snake_name}s-list")\n'
-            f'    {self._build_url_name(snake_name, "specs")} = reverse("{snake_name}s-specs")' if "specs" in self.methods else ""
-            '\n'
-            f'    {self._build_url_name(snake_name, "facets")} = reverse("{snake_name}s-facets")' if "facets" in self.methods else ""
-            '\n\n'
+        )
+        header_lines += (
+            f'    {self._build_url_name(snake_name, "specs")} = reverse("{snake_name}s-specs")\n' if "specs" in self.methods else ""
+        )
+        header_lines += (
+            f'    {self._build_url_name(snake_name, "facets")} = reverse("{snake_name}s-facets")\n' if "facets" in self.methods else ""
         )
         self.dump_test_data(header_lines)
 

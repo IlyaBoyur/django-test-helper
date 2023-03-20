@@ -1,7 +1,7 @@
 import argparse
 
 from factory_builder import FactoryFileBuilder
-from viewset_builders import TestViewsetImportsBuilder, TestViewsetBuilder
+from viewset_builders import TestViewsetImportsBuilder, TestViewsetBuilder, TestViewsetFileBuilder
 from routes_builder import TestRouteImportsBuilder, TestRouteBuilder
 from constants import SUPPORTED_TESTS
 
@@ -26,19 +26,11 @@ if __name__ == "__main__":
     with open(factories_file, "w") as file:
         file.writelines(builder.out)
 
-
-    builder = TestViewsetImportsBuilder(models=MODELS)
+    builder = TestViewsetFileBuilder(models=MODELS, methods=SUPPORTED_TESTS)
     builder.build()
     with open(test_view_file, "w") as file:
         file.writelines(builder.out)
 
-    for model in MODELS:
-        builder = TestViewsetBuilder(model, methods=SUPPORTED_TESTS)
-        builder.build()
-        with open(test_view_file, "a") as file:
-            file.writelines(builder.out)
-    
-        
     builder = TestRouteImportsBuilder(models=MODELS)
     builder.build()
     with open(test_routes_file, "w") as file:
