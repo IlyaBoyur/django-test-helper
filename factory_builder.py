@@ -2,8 +2,7 @@ from typing import List
 
 
 class FactoryFileBuilder:
-    def __init__(self, infile: str, models: List[str], out: List[str]=None):
-        self.infile = infile
+    def __init__(self, models: List[str], out: List[str]=None):
         self.models = models or []
         self.out = out or []
  
