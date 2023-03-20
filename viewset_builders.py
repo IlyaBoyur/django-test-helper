@@ -4,14 +4,20 @@ from textwrap import dedent
 
 
 class TestViewsetFileBuilder:
-    def __init__(self, models, out: List[str]=None):
+    def __init__(self, models, methods: List[str]=None,  out: List[str]=None):
         self.models = models or []
+        self.methods = methods or []
         self.out = out or []
     
     def build(self):
-        imports = TestViewsetImportsBuilder(self.models, None)
+        imports = TestViewsetImportsBuilder(self.models)
+        imports.build()
+        self.out.extend(imports.out)
 
-
+        for model in self.models:
+            viewset = TestViewsetBuilder(model, self.methods)
+            viewset.build()
+            self.out.extend(viewset.out)
 
 
 class TestViewsetImportsBuilder:
