@@ -3,6 +3,22 @@ from textwrap import dedent
 import re
 
 
+class TestRouteFileBuilder:
+    def __init__(self, models: List[str], data: UrlData, methods: List[str]=None, out: List[str]=None):
+        self.models = models
+        self.data = data
+        self.methods = methods or []
+        self.out = out or []
+
+    def build(self):
+        imports = TestRouteImportsBuilder(self.models, out=self.out)
+        imports.build()
+        self.out.extend(imports.out)
+
+        routes = TestRouteBuilder(self.data, methods=self.methods, out=self.out)
+        imports.build()
+        self.out.extend(imports.out)
+
 
 class TestRouteImportsBuilder:
     """
@@ -33,7 +49,7 @@ class TestRouteImportsBuilder:
         self.out.extend(lines)
 
 
-ViewsetData = Tuple[str, str, List[str]]
+UrlData = Tuple[str, str]
 
 
 class TestRouteBuilder:
@@ -41,11 +57,11 @@ class TestRouteBuilder:
     Routes tests builder
     """
 
-    def __init__(self, data: ViewsetData, out: List[str]=None):
-        prefix, basename, methods = data
+    def __init__(self, data: UrlData, methods: List[str]=None, out: List[str]=None):
+        prefix, basename = data
         self.prefix = prefix
         self.basename = basename
-        self.methods = methods
+        self.methods = methods or []
         self.out = out or []
 
     @staticmethod
