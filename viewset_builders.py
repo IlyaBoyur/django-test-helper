@@ -169,7 +169,7 @@ class TestViewsetBuilder:
                 with django_assert_num_queries(1):
                     response = api_client.get(self.{self._build_url_name(snake_name, "facets")})
                 json = response.json()
-                facets = {{spec["name"]: facet.get("choices") or facet.get("range") for facet in response.json()["facets"]}}
+                facets = {{facet["name"]: facet.get("choices") or facet.get("range") for facet in response.json()["facets"]}}
                 
                 assert response.status_code == HTTP_200_OK
                 assert facets["<facet>"] == len(<model>)
