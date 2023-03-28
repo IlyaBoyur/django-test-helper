@@ -27,7 +27,7 @@ class TestViewsetImportsBuilder:
         import_lines = (
             f"import pytest\n\n"
             f"from rest_framework.reverse import reverse\n"
-            f"from rest_framework.status import HTTP_200_OK\n\n"
+            f"from rest_framework.status import HTTP_200_OK, HTTP_204_NO_CONTENT\n\n"
             f"from .factories import {factories}\n\n\n"
         )
         self.out.extend(import_lines)
@@ -80,7 +80,9 @@ class TestViewsetBuilder:
         if "filter" in self.methods:
             self.dump_test_filter()
         self.dump_test_class_footer()
-
+        if "delete" in self.methods:
+            self.dump_test_delete()
+        self.dump_test_class_footer()
     def dump_test_class_header(self):
         snake_name = self.snake
 
@@ -206,6 +208,31 @@ class TestViewsetBuilder:
                 assert response.status_code == HTTP_200_OK
                 for {snake_name} in response.json():
                     assert {snake_name}["<filter>"] == <value>
+        """
+        )
+        text = self.text_indenter(filter_lines)
+        self.dump_test_data(text)
+
+    def dump_test_delete(self):
+        camel_name = self.camel
+        snake_name = self.snake
+        detail_url = self._build_url_name(snake_name, "detail")
+
+        filter_lines = dedent(
+        f"""
+            @pytest.mark.django_db
+            def test_delete(self, django_assert_num_queries, api_client):
+                from {snake_name}s.models import {camel_name}
+
+                {snake_name} = {camel_name}Factory()
+                {detail_url} = reverse("{snake_name}s-detail", args=[{snake_name}.id])
+
+                with django_assert_num_queries(1):
+                    response = api_client.delete({detail_url})
+
+                assert response.status_code == HTTP_204_NO_CONTENT
+                assert len(response.content) == 0
+                assert {camel_name}.objects.count() == 0
         """
         )
         text = self.text_indenter(filter_lines)
