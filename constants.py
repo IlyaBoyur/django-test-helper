@@ -1,1 +1,3 @@
-SUPPORTED_TESTS = ("list", "detail", "specs", "facets", "filter")
+SUPPORTED_TESTS = (
+    "list", "detail", "delete", "specs", "facets", "filter"
+)
