@@ -1,10 +1,9 @@
 import argparse
 
-from factory_builder import FactoryFileBuilder
-from viewset_builders import TestViewsetImportsBuilder, TestViewsetBuilder, TestViewsetFileBuilder
-from routes_builder import TestRouteImportsBuilder, TestRouteBuilder, TestRouteFileBuilder
 from constants import SUPPORTED_TESTS
-
+from factory_builder import FactoryFileBuilder
+from routes_builder import TestRouteFileBuilder
+from viewset_builders import TestViewsetFileBuilder
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Test boilerplate code builder")
@@ -20,15 +19,16 @@ if __name__ == "__main__":
     test_routes_file = args.test_routes or "out/test_routes_TEMP.py"
 
     MODELS = open(models_file).readlines() if models_file else []
-    
+
     for builder, filename in [
         [FactoryFileBuilder(models=MODELS), factories_file],
         [TestViewsetFileBuilder(models=MODELS, methods=SUPPORTED_TESTS), test_view_file],
-        [TestRouteFileBuilder(
-            models=MODELS, 
-            data=["actions", "actions"],
-            methods=SUPPORTED_TESTS
-        ), test_routes_file],
+        [
+            TestRouteFileBuilder(
+                models=MODELS, data=["actions", "actions"], methods=SUPPORTED_TESTS
+            ),
+            test_routes_file,
+        ],
     ]:
         builder.build()
         with open(filename, "w") as file:
