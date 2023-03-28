@@ -18,7 +18,7 @@ if __name__ == "__main__":
     test_view_file = args.test_views or "out/test_viewsets.py"
     test_routes_file = args.test_routes or "out/test_routes_TEMP.py"
 
-    MODELS = open(models_file).readlines() if models_file else []
+    MODELS = [model.strip() for model in open(models_file).readlines()] if models_file else []
 
     for builder, filename in [
         [FactoryFileBuilder(models=MODELS), factories_file],
