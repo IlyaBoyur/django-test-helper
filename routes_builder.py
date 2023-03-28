@@ -1,14 +1,13 @@
-from typing import Iterable, List, Dict, Tuple, Generator
 from textwrap import dedent
-import re
-
+from typing import Dict, Generator, Iterable, List, Tuple
 
 UrlData = Tuple[str, str]
 
 
-
 class TestRouteFileBuilder:
-    def __init__(self, models: List[str], data: UrlData, methods: List[str]=None, out: List[str]=None):
+    def __init__(
+        self, models: List[str], data: UrlData, methods: List[str] = None, out: List[str] = None
+    ):
         self.models = models
         self.data = data
         self.methods = methods or []
@@ -17,11 +16,10 @@ class TestRouteFileBuilder:
     def build(self):
         for builder in [
             TestRouteImportsBuilder(self.models),
-            TestRouteBuilder(self.data, methods=self.methods)
+            TestRouteBuilder(self.data, methods=self.methods),
         ]:
             builder.build()
             self.out.extend(builder.out)
-
 
 
 class TestRouteImportsBuilder:
@@ -29,7 +27,7 @@ class TestRouteImportsBuilder:
     Routes test imports builder
     """
 
-    def __init__(self, models: List[str], out: List[str]=None):
+    def __init__(self, models: List[str], out: List[str] = None):
         self.models = models
         self.out = out or []
 
@@ -37,13 +35,13 @@ class TestRouteImportsBuilder:
         if not self.models:
             raise RuntimeError("Модели для импорта не предоставлены")
         self._dump_test_imports()
-    
+
     def _dump_test_imports(self):
         factories = ", ".join(model + "Factory" for model in self.models)
         import_lines = (
-            f'import pytest\n\n'
-            f'from rest_framework.reverse import reverse\n\n'
-            f'from .factories import {factories}\n\n\n'
+            f"import pytest\n\n"
+            f"from rest_framework.reverse import reverse\n\n"
+            f"from .factories import {factories}\n\n\n"
         )
         self._dump_test_data(import_lines)
 
@@ -53,15 +51,12 @@ class TestRouteImportsBuilder:
         self.out.extend(lines)
 
 
-
-
-
 class TestRouteBuilder:
     """
     Routes tests builder
     """
 
-    def __init__(self, data: UrlData, methods: List[str]=None, out: List[str]=None):
+    def __init__(self, data: UrlData, methods: List[str] = None, out: List[str] = None):
         prefix, basename = data
         self.prefix = prefix
         self.basename = basename
@@ -94,7 +89,8 @@ class TestRouteBuilder:
         self.dump_test_footer()
 
     def dump_test_header(self):
-        header_lines = dedent("""
+        header_lines = dedent(
+            """
         @pytest.mark.django_db
         def test_routes():
             \"\"\"
@@ -103,7 +99,8 @@ class TestRouteBuilder:
             \"\"\"
 
             routes = {
-        """)
+        """
+        )
         text = self.text_indenter(header_lines, 0)
         self._dump_test_data(text)
 
@@ -113,9 +110,7 @@ class TestRouteBuilder:
         self._dump_test_data(text)
 
     def dump_test_detail_route(self, prefix: str, basename: str, detailname: str):
-        detail_lines = (
-            f'f"/api/{prefix}/{{{detailname}.id}}/": reverse("{basename}-detail", args=[{detailname}.id]),'
-        )
+        detail_lines = f'f"/api/{prefix}/{{{detailname}.id}}/": reverse("{basename}-detail", args=[{detailname}.id]),'
         text = self.text_indenter(detail_lines, 2)
         self._dump_test_data(text)
 
@@ -130,11 +125,13 @@ class TestRouteBuilder:
         self._dump_test_data(text)
 
     def dump_test_footer(self):
-        footer_lines = dedent("""
+        footer_lines = dedent(
+            """
         }
         for url, reversed_url in routes.items():
             assert url == reversed_url\n\n
-        """)
+        """
+        )
         text = self.text_indenter(footer_lines)
         self._dump_test_data(text)
 
